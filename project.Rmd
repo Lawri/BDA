@@ -1,0 +1,46 @@
+---
+title: "Project"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(caTools)
+library(rstan)
+set.seed(0500)
+```
+
+```{r}
+df = read.csv("creditcard.csv")
+head(df)
+```
+```{r}
+split <- sample.split(df$Class, SplitRatio = 0.0001)
+train <-  subset(df, split == TRUE)
+test <- subset(df, split == FALSE)
+
+drop <- c("Time", "Amount", "Class")
+traindrop = train[,!(names(train) %in% drop)]
+```
+
+```{r}
+d1 = dim(traindrop)[1]
+d2 = dim(traindrop)[2]
+
+stan_data = list(N=d1,
+                 K=d2,
+                 x=traindrop,
+                 y=train$Class,
+                 alpha=0,
+                 beta=rep(1, d1),
+                 sigma=rep(0, d1))
+
+linear = stan(file="linear.stan", data=stan_data)
+monitor(linear)
+```
+
+
+```{r}
+summary(linear)
+```
