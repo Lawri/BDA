@@ -1,26 +1,28 @@
 data {
-  // training data
-  int<lower=1> K;               // num topics
-  int<lower=1> V;               // num words
-  int<lower=0> M;               // num docs
-  int<lower=0> N;               // total word instances
-  int<lower=1,upper=K> z[M];    // topic for doc m
-  int<lower=1,upper=V> w[N];    // word n
-  int<lower=1,upper=M> doc[N];  // doc ID for word n
-  // hyperparameters
-  vector<lower=0>[K] alpha;     // topic prior
-  vector<lower=0>[V] beta;      // word prior
+  int N;
+  int J;
+  matrix[N, J] V;
+  int[N] defaulted;
 }
+
 parameters {
-  simplex[K] theta;   // topic prevalence
-  simplex[V] phi[K];  // word dist for topic k
+  real<lower=0, upper=1> class_prob;
+
+  array[2] vector[J] mu;
+  array[2] vector<lower=0>[J] sigma;
 }
+
 model {
-  theta ~ dirichlet(alpha);
-  for (k in 1:K)
-    phi[k] ~ dirichlet(beta);
-  for (m in 1:M)
-    z[m] ~ categorical(theta);
-  for (n in 1:N)
-    w[n] ~ categorical(phi[z[doc[n]]]);
+  class_prob ~ beta(1, 1)
+
+  for (k in 1:2) {
+    mu[k] ~ normal(0, 100000);
+    sigma[k] ~ normal(0, 100000);
+  }
+
+  defaulted ~ bernoulli(class_prob);
+  
+  for (n in 1:N) {
+    V[n] ~ normal(mu[defaulted[n] + 1], sigma[defaulted[n] + 1]);
+  }
 }
