@@ -1,5 +1,5 @@
 ---
-title: "Project"
+title: "BDA Project"
 output: pdf_document
 ---
 
@@ -12,11 +12,12 @@ set.seed(0500)
 ```
 
 ```{r}
-df = read.csv("creditcard.csv")
+df = read.csv("data/processed_data.csv")
 head(df)
 ```
+
 ```{r}
-split <- sample.split(df$Class, SplitRatio = 0.0001)
+split <- sample.split(df$Class, SplitRatio = 0.7)
 train <-  subset(df, split == TRUE)
 test <- subset(df, split == FALSE)
 
@@ -28,19 +29,16 @@ traindrop = train[,!(names(train) %in% drop)]
 d1 = dim(traindrop)[1]
 d2 = dim(traindrop)[2]
 
-stan_data = list(N=d1,
-                 K=d2,
-                 x=traindrop,
-                 y=train$Class,
-                 alpha=0,
-                 beta=rep(1, d1),
-                 sigma=rep(0, d1))
 
-linear = stan(file="linear.stan", data=stan_data)
-monitor(linear)
+stan_data = list(N=d1,
+                 J=d2,
+                 V=traindrop,
+                 defaulted=train$Class)
+
+model = stan(file="naive.stan", data=stan_data)
 ```
 
 
 ```{r}
-summary(linear)
+summary(traindrop)
 ```
