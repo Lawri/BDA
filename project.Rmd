@@ -40,5 +40,5 @@ model = stan(file="naive.stan", data=stan_data)
 
 
 ```{r}
-summary(traindrop)
+f = as.data.frame(model)
 ```

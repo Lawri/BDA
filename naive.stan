@@ -16,15 +16,23 @@ parameters {
 model {
   class_prob ~ beta(1, 1); // Uniform, improper prior
 
-  for (k in 1:2) {
-    mu[k] ~ normal(0, 100000);     // Massively uninformative, inappropriate priors
-    sigma[k] ~ normal(0, 100000);
-  }
+  mu[1] ~ normal(0.5, 1);     //uninformative priors
+  mu[2] ~ normal(0, 1);
+  sigma[1] ~ normal(0.5, 1);
+  sigma[2] ~ normal(0, 1);
 
   defaulted ~ bernoulli(class_prob);
   // Likelihood for each outcome, using the Mean and SD associated with the appropriate class
   // Have to add 1, as defaulted contains 0 & 1, but we need to index using 1 & 2
   for (n in 1:N) {
     V[n] ~ normal(mu[defaulted[n] + 1], sigma[defaulted[n] + 1]);
+  }
+}
+
+generated quantities {
+  vector[J] pc_corr;
+  
+  for (j in 1:J) {
+    pc_corr[j] = normal_cdf(V[j], 1, 1);
   }
 }
