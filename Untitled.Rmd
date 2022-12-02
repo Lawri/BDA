@@ -1,0 +1,36 @@
+---
+title: "project"
+author: "Anonymous"
+output: 
+  pdf_document: 
+    toc: no
+    toc_depth: 0
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Set up libraries and data:
+
+```{r}
+library(ggplot2)
+library(rstan)
+set.seed(0500)
+```
+
+```{r}
+df = read.csv("/Users/longlipop/Desktop/BDA_project/BDA/data/processed_data.csv")
+head(df)
+```
+
+```{r}
+# Split the data into training and testing set
+training_size = round(0.7 * nrow(df),0) 
+tr_idx = sample(nrow(df), training_size) 
+training_data = df[tr_idx,]
+testing_data = df[-tr_idx,]
+# Convert the target (originally categorical) into numerical variable
+y_train = factor(training_data$Class)
+y_test = factor(testing_data$Class)
+```

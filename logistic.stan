@@ -24,4 +24,4 @@ data {
  generated quantities {
  vector[N_test] E_y_test = inv_logit(alpha + x_test * beta);
  real log_loss = -bernoulli_logit_lpmf(y_test | alpha + x_test * beta);
- real sq_loss = dot_self(to_vector(y_test) - E_y_test);
+ real sq_loss = dot_self(to_vector(y_test) - E_y_test); }
