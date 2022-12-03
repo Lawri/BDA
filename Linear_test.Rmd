@@ -1,0 +1,89 @@
+---
+title: "Project"
+output: pdf_document
+---
+
+```{r}
+library(rstan)
+library(caTools)
+library(ggplot2)
+library(aaltobda)
+set.seed(123)
+```
+
+```{r}
+df = read.csv("creditcard.csv")
+head(df)
+```
+
+```{r}
+# Undersampled data for training
+sampled_df = read.csv("processed_data.csv")
+head(sampled_df)
+summary(sampled_df)
+```
+
+```{r}
+split1 <- sample.split(df$Class, SplitRatio = 0.0017)
+train1 <- sampled_df
+test1 <- subset(df, split == TRUE)
+
+split2 <- sample.split(df$Class, SplitRatio = 0.3)
+train2 <- subset(df, split == FALSE)
+test2 <- subset(df, split == TRUE)
+
+split3 <- sample.split(sampled_df$Class, SplitRatio = 0.3)
+train2 <- subset(sampled_df, split == FALSE)
+test2 <- subset(sampled_df, split == TRUE)
+```
+
+```{r}
+# drop <- c("Time", "Amount", "Class")
+# train = sampled_df[, !(names(train) %in% drop)]
+# train = train[,!(names(train) %in% drop)]
+# test = test[,!(names(test) %in% drop)]
+```
+
+```{r}
+train = sampled_df
+head(train)
+```
+
+```{r}
+d1 = dim(train)[1]
+d2 = dim(train)[2]
+
+stan_data = list(N=nrow(train),
+                 K=ncol(train),
+                 x=train,
+                 y=train$Class)
+                 # alpha=0,
+                 # beta=rep(1, d1),
+                 # sigma=rep(0, d1))
+
+linear = stan(file="linear.stan", data=stan_data)
+monitor(linear)
+```
+
+
+```{r}
+monitor(linear)
+```
+
+```{r}
+summary(linear)
+```
+
+```{r}
+# Split the data into training and testing set
+training_size = round(0.7 * nrow(df),0) 
+tr_idx = sample(nrow(df), training_size) 
+training_data = df[tr_idx,]
+testing_data = df[-tr_idx,]
+# Convert the target (originally categorical) into numerical variable
+y_train = factor(training_data$Class)
+y_test = factor(testing_data$Class)
+```
+
+
+
